@@ -29,9 +29,7 @@ invisible(lapply(
 # 2. GET TRADE DATA
 #------------------
 
-comtradr::set_primary_comtrade_key(
-    ""
-) # PLEASE INSERT YOUR API KEY BETWEEN THE DOUBLE QUOTATION MARKS
+comtradr::set_primary_comtrade_key("") # PLEASE INSERT YOUR API KEY BETWEEN THE DOUBLE QUOTATION MARKS
 
 wheat_codes <- comtradr::ct_commodity_lookup(
     "wheat",
@@ -161,7 +159,7 @@ crs_robinson <- "+proj=robin +lon_0=0w"
 wheat_points_sf <- end_coords |>
     dplyr::group_by(partner_iso) |>
     dplyr::arrange(
-        splyr::desc(qty)
+        dplyr::desc(qty)
     ) |>
     dplyr::ungroup() |>
     sf::st_as_sf(
@@ -169,7 +167,120 @@ wheat_points_sf <- end_coords |>
         crs = 4326
     )
 
-p <- ggplot() +
+p1 <- ggplot() +
+geom_sf(
+    data = world_shp,
+    fill = "#063140",
+    color = "#18BFF2",
+    size = .2,
+    alpha = .35
+) +
+geom_sf(
+    data = wheat_lines_sf,
+    aes(
+        size = qty / 1000000,
+        alpha = qty / 1000000
+    ),
+    fill = "#ff6103",
+    color = "#ff6103"
+) +
+geom_sf(
+    data = wheat_points_sf,
+    aes(
+        size = qty / 1000000
+    ),
+    fill = "#ff6103",
+    color = "#ff6103",
+    alpha = .85,
+    stroke = .25
+) +
+scale_size(
+    name = "thousands of tonnes",
+    range = c(.5, 2)
+) +
+scale_alpha(
+    range = c(.25, .75)
+) +
+coord_sf(crs = crs_robinson) +
+guides(
+    alpha = "none",
+    size = guide_legend(
+        override.aes = list(
+            fill = NULL,
+            alpha = .85,
+            color = "#ff6103"
+        ),
+        direction = "horizontal",
+        keyheight = unit(1.5, "mm"),
+        keywidth = unit(15, "mm"),
+        title.position = "top",
+        title.hjust = .5,
+        label.hjust = .5,
+        label.position = "top",
+        nrow = 1,
+        byrow = T
+    )
+) +
+labs(
+    x = "",
+    y = "",
+    subtitle = "",
+    title = "Wheat imports from Ukraine in 2022",
+    caption = "United Nations. 2023. UN comtrade
+      http://comtrade.un.org"
+) +
+theme_void() +
+theme(
+    plot.background = element_rect(
+        fill = "#052833",
+        color = NA
+    ),
+    panel.background = element_rect(
+        fill = "#052833",
+        color = NA
+    ),
+    legend.background = element_rect(
+        fill = "#052833",
+        color = NA
+    ),
+    legend.position = c(.55, 0),
+    panel.grid.major = element_line(
+        color = "#052833",
+        size = 0
+    ),
+    plot.title = element_text(
+        size = 22,
+        color = "#ff6103",
+        hjust = .5, vjust = 1
+    ),
+    plot.caption = element_text(
+        size = 8,
+        color = "grey80",
+        hjust = .15, vjust = 0
+    ),
+    legend.title = element_text(
+        size = 10,
+        color = "#ff6103"
+    ),
+    legend.text = element_text(
+        size = 9,
+        color = "#ff6103"
+    ),
+    plot.margin = unit(
+        c(
+            t = 1, r = -2,
+            b = .5, l = -2
+        ), "lines"
+    )
+)
+
+ggsave(
+    "ukraine-export_wheat-nolabel.png",
+    width = 10, h = 6, dpi = 600,
+    device = "png", bg = "#052833", p1
+) 
+
+p2 <- ggplot() +
 geom_sf(
     data = world_shp,
     fill = "#063140",
@@ -293,7 +404,7 @@ theme(
 ggsave(
     "ukraine-export_wheat-label.png",
     width = 10, h = 6, dpi = 600,
-    device = "png", bg = "#052833", p
+    device = "png", bg = "#052833", p2
 )  
 
 # PART II: MULTIPLE COUNTRIES
@@ -375,7 +486,7 @@ cols <- c(
     "#bb023a"
 )
 
-p1 <- ggplot() +
+p3 <- ggplot() +
 geom_sf(
     data = world_shp,
     fill = "grey20",
@@ -484,6 +595,5 @@ theme(
 ggsave(
     "multiple-export_wheat.png",
     width = 10, h = 6, dpi = 600,
-    device = "png", bg = "grey20", p1
+    device = "png", bg = "grey20", p3
 )  
-
