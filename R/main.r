@@ -41,7 +41,7 @@ wheat_exports <- comtradr::ct_get_data(
     commodity_code = "1001",
     flow_direction = "export",
     reporter = "UKR",
-    partner = "all",
+    partner = "all_countries",
     start_date = 2022,
     end_date = 2022
 )
